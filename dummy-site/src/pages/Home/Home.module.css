@@ -1,0 +1,12 @@
+.page {
+  min-height: 100vh;
+  background: #020617;
+  color: white;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}

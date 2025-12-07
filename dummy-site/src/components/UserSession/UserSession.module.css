@@ -1,0 +1,54 @@
+.container {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+  background: #030712;
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.description {
+  margin-top: 0;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.controls {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.inputGroup {
+  flex: 1;
+  min-width: 180px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.input,
+.select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #374151;
+  background: #020617;
+  color: white;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: #2563eb;
+}

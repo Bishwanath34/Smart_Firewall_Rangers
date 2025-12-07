@@ -1,0 +1,35 @@
+.button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: opacity 0.2s;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:not(:disabled):hover {
+  opacity: 0.9;
+}
+
+.primary {
+  background: #2563eb;
+}
+
+.safe {
+  background: #16a34a;
+}
+
+.warning {
+  background: #ea580c;
+}
+
+.danger {
+  background: #b91c1c;
+}

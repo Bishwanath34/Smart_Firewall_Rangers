@@ -1,0 +1,50 @@
+.container {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+  background: #030712;
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.loading {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.empty {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.response {
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  background: #020617;
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid #1f2937;
+}
+
+.responseRow {
+  margin-bottom: 6px;
+}
+
+.label {
+  color: #9ca3af;
+}
+
+.responseBody {
+  margin: 0;
+  overflow-x: auto;
+  background: #020617;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #1f2937;
+  margin-top: 4px;
+}
