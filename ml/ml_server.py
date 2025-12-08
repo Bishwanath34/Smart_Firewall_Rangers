@@ -4,6 +4,7 @@ import joblib
 import pandas as pd
 import os
 import logging
+import uvicorn   # <-- REQUIRED IMPORT
 
 # -----------------------------------------------------
 #  Logging
@@ -51,13 +52,9 @@ class RequestContext(BaseModel):
 @app.post("/score")
 def score(context: RequestContext):
     try:
-        # Convert to DataFrame
         df = pd.DataFrame([context.model_dump()])
-
-        # Predict probability
         proba = float(model.predict_proba(df)[0][1])
 
-        # Risk label
         if proba < 0.3:
             label = "normal"
         elif proba < 0.6:
@@ -65,22 +62,24 @@ def score(context: RequestContext):
         else:
             label = "high_risk"
 
-        return {
-            "ml_risk": proba,
-            "ml_label": label
-        }
+        return {"ml_risk": proba, "ml_label": label}
 
     except Exception as e:
         logger.error(f"Prediction error: {e}")
         raise HTTPException(status_code=500, detail="Error during prediction")
 
+
 # -----------------------------------------------------
-#  Health Check (for Kubernetes / Render / AWS)
+#  Health Check
 # -----------------------------------------------------
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# -----------------------------------------------------
+#  Local run (Render will bypass this and use gunicorn)
+# -----------------------------------------------------
 if __name__ == "__main__":
-    import os
     port = int(os.getenv("PORT", 10000))
     uvicorn.run(app, host="0.0.0.0", port=port)
