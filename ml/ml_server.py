@@ -1,17 +1,42 @@
-from fastapi import FastAPI
-import joblib
-import uvicorn
-import os
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import joblib
+import pandas as pd
+import os
+import logging
 
-# -------- Load trained ML model --------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(BASE_DIR, "model.joblib")
-model = joblib.load(model_path)
+# -----------------------------------------------------
+#  Logging
+# -----------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+logger = logging.getLogger(__name__)
 
-app = FastAPI(title="AI-NGFW ML Scoring Service")
+# -----------------------------------------------------
+#  Environment Config
+# -----------------------------------------------------
+MODEL_PATH = os.getenv("MODEL_PATH", "model.joblib")
 
-# -------- Request schema --------
+# -----------------------------------------------------
+#  Load ML Model
+# -----------------------------------------------------
+if not os.path.exists(MODEL_PATH):
+    logger.error(f"Model file not found at {MODEL_PATH}")
+    raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
+
+logger.info(f"Loading model from: {MODEL_PATH}")
+model = joblib.load(MODEL_PATH)
+
+# -----------------------------------------------------
+#  FastAPI App
+# -----------------------------------------------------
+app = FastAPI(title="AI-NGFW ML Scoring Service", version="1.0")
+
+# -----------------------------------------------------
+#  Request Schema
+# -----------------------------------------------------
 class RequestContext(BaseModel):
     method: str
     path: str
@@ -20,39 +45,38 @@ class RequestContext(BaseModel):
     userAgent: str
     risk_rule: float
 
-# -------- Scoring endpoint --------
+# -----------------------------------------------------
+#  Scoring Endpoint
+# -----------------------------------------------------
 @app.post("/score")
 def score(context: RequestContext):
+    try:
+        # Convert to DataFrame
+        df = pd.DataFrame([context.model_dump()])
 
-    # Make a dataframe with a single row
-    row = {
-        "method": context.method,
-        "path": context.path,
-        "role": context.role,
-        "userId": context.userId,
-        "userAgent": context.userAgent,
-        "risk_rule": context.risk_rule,
-    }
+        # Predict probability
+        proba = float(model.predict_proba(df)[0][1])
 
-    import pandas as pd
-    df = pd.DataFrame([row])
+        # Risk label
+        if proba < 0.3:
+            label = "normal"
+        elif proba < 0.6:
+            label = "medium_risk"
+        else:
+            label = "high_risk"
 
-    # Predict probabilities
-    proba = model.predict_proba(df)[0][1]   # probability of is_attack == 1
+        return {
+            "ml_risk": proba,
+            "ml_label": label
+        }
 
-    # Labeling
-    if proba < 0.3:
-        label = "normal"
-    elif proba < 0.6:
-        label = "medium_risk"
-    else:
-        label = "high_risk"
+    except Exception as e:
+        logger.error(f"Prediction error: {e}")
+        raise HTTPException(status_code=500, detail="Error during prediction")
 
-    return {
-        "ml_risk": float(proba),
-        "ml_label": label
-    }
-
-# -------- Run server --------
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+# -----------------------------------------------------
+#  Health Check (for Kubernetes / Render / AWS)
+# -----------------------------------------------------
+@app.get("/health")
+def health():
+    return {"status": "ok"}
